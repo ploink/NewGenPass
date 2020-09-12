@@ -1,0 +1,202 @@
+<html>
+<head>
+
+<style>
+  input[type="text"] {width: 20em;}
+  input[type="email"] {width: 20em;}
+</style>
+
+<script>
+function fnv1_128(s) {
+  let p = 309485009821345068724781371n;
+  let h = 0n;
+  for (let c of s) {  
+    h *= p;
+    h &= 0xffffffffffffffffffffffffffffffffn;
+    h ^= BigInt(c.charCodeAt(0));
+  }
+  return h;
+}
+  
+function generate() {
+  s=document.getElementById("source").value;
+  s=s.replace("[EMAIL]",document.getElementById("email").value);
+  s=s.replace("[OFFSET]",fnv1_128(document.getElementById("offset").value));  
+  s=s.replace("[SPECIALCHARS]",document.getElementById("specialChars").value);
+  s=s.replace("[LENGTH]",document.getElementById("length").value);
+  s=s.replace("[UPPER]",document.getElementById("upper").value);
+  s=s.replace("[LOWER]",document.getElementById("lower").value);
+  s=s.replace("[DIGITS]",document.getElementById("digits").value);
+  s=s.replace("[SPECIAL]",document.getElementById("special").value);
+  snippet.value=s;
+  s=s.replace(/\/\/.*/g,"");
+  s=s.replace(/\s*{\s*/g,"{").replace(/\s*}\s*/g,"}");
+  s=s.replace(/\s*\(\s*/g,"(").replace(/\s*\)\s*/g,")");
+  s=s.replace(/\s*=\s*/g,"=");
+  s=s.replace(/\s*&&\s*/g,"&&");
+  s=s.replace(/\s*\*\s*/g,"*");
+  s=s.replace(/\s*\&\s*/g,"&");
+  s=s.replace(/\s*\^\s*/g,"^");
+  s=s.replace(/\\?\s*\n\s*/g,'');
+  s="javascript:(function(){"+s+"})();";
+  let e=document.getElementById("bookmarklet"); 
+  e.href=s; 
+  e.style.visibility="inherit";
+}
+</script>
+</head>
+<body>
+
+
+<h2>Newgenpass.js generator</h2>
+<form>
+<p>
+  <label for="email"><b>Autofill email address.</b><br>
+  leave blank to disable this feature<br></label>
+  <input type="email" id="email">
+</p>
+
+<p><b>Changing any of the options below changes the generated passwords.</b><br>
+Remember what you enter here and/or backup your bookmarklet.</p>
+
+<p>
+  <label for="offset">
+    <b>Seed text to calculate the <a href="https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function#FNV_offset_basis" target="_blank">encryption offset_basis</a>.</b><br>
+      You may change this to any random text to customize the encryption:<br>
+  </label>
+  <input type="text" id="offset" onClick="this.select();" value="chongo <Landon Curt Noll> /\../\">
+</p>
+
+<p>
+<label for="specialChars"><b>Permitted special characters in a password.</b><br>
+  Many web sites require one or more special characters in a password. For <a href="https://www.ibm.com/support/pages/password-policy-and-passwords-special-characters" target="_blank">some</a>, special characters are those thingies above the number keys (1-8) and as a result these are the only ones that some sites allow:<br></label>
+  <input type="text" id="specialChars" value="!@#$%^&*">
+</p>
+
+<p>
+  <b>Password requirements.</b><br>
+  If the generated password does not meet the requirements below, a version number is appended (like _1, _2, etc) and the password is hashed again until it does meet the requirements. If you specify impossible or very rare requirements, the algorithm gets stuck in a loop.
+</p>
+<p>
+  <table border=0>
+  <tr><td><label for="length">Password length (8-21 characters):</label></td>
+  <td><input type="number" id="length" min="8" max="21" value="16"></td></tr>
+  <tr><td><label for="upper">Minimum number of uppercase characters:</label></td>
+  <td><input type="number" id="upper" min="0" max="3" value="2"></td></tr>
+  <tr><td><label for="lower">Minimum number of lowercase characters:</label></td>
+  <td><input type="number" id="lower" min="0" max="3" value="2"></td></tr>
+  <tr><td><label for="digits">Minimum number of digits:</label></td>
+  <td><input type="number" id="digits" min="0" max="3" value="2"></td></tr>
+  <tr><td><label for="special">Minimum number of special characters:</label></td>
+  <td><input type="number" id="special" min="0" max="3" value="1"></td></tr>
+  </table>
+</p>
+
+<p>
+  <button type="button" onClick="generate()">Generate</button>
+</p>
+</form>
+<a href="" id="bookmarklet" style="visibility: hidden;">This is your password generator bookmarklet</a>
+<br>
+
+<hr>
+<p>Javascript snippet:</p>
+<textarea id="snippet" cols="80" rows="20"></textarea>
+
+<br><textarea id="source" style="display: none; visibility: hidden;">
+function fnv1a_128(s) {
+  let p = 309485009821345068724781371n;
+  let h = [OFFSET]n;
+  for (let c of s) {  
+    h ^= BigInt(c.charCodeAt(0));
+    h *= p;
+    h &= 0xffffffffffffffffffffffffffffffffn;
+  }
+  return h;
+}
+
+function chk(s1,s2,n) {
+  let i=0;
+  for (let c of s1) if (s2.includes(c)) i++;
+  return (i>=n);
+}
+
+function hash(s) {
+  let su="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let sl=su.toLowerCase();
+  let sd="0123456789";
+  let ss="[SPECIALCHARS]";
+  let sa=su+sl+sd+ss;
+  for (r=1;;r++) {
+    h=fnv1a_128(s);
+    s="";
+    l=BigInt(sa.length);
+    for (let i=[LENGTH];i--;) {
+      s+=sa[h % l]; 
+      h/=l;
+    }
+    if (chk(s,ss,[SPECIAL]) && chk(s,sd,[DIGITS]) && chk(s,sl,[LOWER]) && chk(s,su,[UPPER])) break;
+    s+='_'+r.toString();
+  } 
+  return s;
+}
+
+function host() {
+  host=window.location.hostname.split('.');
+  if (host.length<=2) return (host.join('.'));
+  else {
+    s=host.slice(-2).join('.');
+    d = 'ab.ca|ac.ac|ac.at|ac.be|ac.cn|ac.il|ac.in|ac.jp|ac.kr|ac.nz|ac.th|ac.uk|ac.za|adm.br|adv.br|agro.pl|ah.cn|aid.pl|alt.za|am.br|arq.br|art.br|arts.ro|asn.au|asso.fr|asso.mc|atm.pl|auto.pl|bbs.tr|bc.ca|bio.br|biz.pl|bj.cn|br.com|cn.com|cng.br|cnt.br|co.ac|co.at|co.il|co.in|co.jp|co.kr|co.nz|co.th|co.uk|co.za|com.au|com.br|com.cn|com.ec|com.fr|com.hk|com.mm|com.mx|com.pl|com.ro|com.ru|com.sg|com.tr|com.tw|cq.cn|cri.nz|de.com|ecn.br|edu.au|edu.cn|edu.hk|edu.mm|edu.mx|edu.pl|edu.tr|edu.za|eng.br|ernet.in|esp.br|etc.br|eti.br|eu.com|eu.lv|fin.ec|firm.ro|fm.br|fot.br|fst.br|g12.br|gb.com|gb.net|gd.cn|gen.nz|gmina.pl|go.jp|go.kr|go.th|gob.mx|gov.br|gov.cn|gov.ec|gov.il|gov.in|gov.mm|gov.mx|gov.sg|gov.tr|gov.za|govt.nz|gs.cn|gsm.pl|gv.ac|gv.at|gx.cn|gz.cn|hb.cn|he.cn|hi.cn|hk.cn|hl.cn|hn.cn|hu.com|idv.tw|ind.br|inf.br|info.pl|info.ro|iwi.nz|jl.cn|jor.br|jpn.com|js.cn|k12.il|k12.tr|lel.br|ln.cn|ltd.uk|mail.pl|maori.nz|mb.ca|me.uk|med.br|med.ec|media.pl|mi.th|miasta.pl|mil.br|mil.ec|mil.nz|mil.pl|mil.tr|mil.za|mo.cn|muni.il|nb.ca|ne.jp|ne.kr|net.au|net.br|net.cn|net.ec|net.hk|net.il|net.in|net.mm|net.mx|net.nz|net.pl|net.ru|net.sg|net.th|net.tr|net.tw|net.za|nf.ca|ngo.za|nm.cn|nm.kr|no.com|nom.br|nom.pl|nom.ro|nom.za|ns.ca|nt.ca|nt.ro|ntr.br|nx.cn|odo.br|on.ca|or.ac|or.at|or.jp|or.kr|or.th|org.au|org.br|org.cn|org.ec|org.hk|org.il|org.mm|org.mx|org.nz|org.pl|org.ro|org.ru|org.sg|org.tr|org.tw|org.uk|org.za|pc.pl|pe.ca|plc.uk|ppg.br|presse.fr|priv.pl|pro.br|psc.br|psi.br|qc.ca|qc.com|qh.cn|re.kr|realestate.pl|rec.br|rec.ro|rel.pl|res.in|ru.com|sa.com|sc.cn|school.nz|school.za|se.com|se.net|sh.cn|shop.pl|sk.ca|sklep.pl|slg.br|sn.cn|sos.pl|store.ro|targi.pl|tj.cn|tm.fr|tm.mc|tm.pl|tm.ro|tm.za|tmp.br|tourism.pl|travel.pl|tur.br|turystyka.pl|tv.br|tw.cn|uk.co|uk.com|uk.net|us.com|uy.com|vet.br|web.za|web.com|www.ro|xj.cn|xz.cn|yk.ca|yn.cn|za.com';
+    d = d.split('|');
+    if (d.indexOf(s)>=0) return (host.slice(-3).join('.'));
+  }
+  return (host.slice(-2).join('.'));
+}
+
+function setInputValue(i,s) {
+  i.value=s;
+  let t = i._valueTracker;
+  if (t) t.setValue("tracker@value");
+  let e = new Event('input', { bubbles: true});
+  e.simulated = true;
+  i.dispatchEvent(e);
+}
+
+
+function genPass() {
+  let pw=prompt("Master password:","");
+  if (!pw) return;
+  let h=host();
+  h=prompt("Using domain name:",h);
+  if (h==null) return;
+  pw=hash(pw+'@'+h);
+  let email="[EMAIL]";
+  if (email) {
+    l=document.querySelectorAll("input[type='email'],\
+    				 input[type='text'][placeholder*='mail'i],\
+    				 input[type='text'][placeholder*='user'i],\
+    				 input[type='text'][placeholder*='login'i],\
+    				 input[type='text'][id*='mail'i],\
+    				 input[type='text'][id*='user'i],\
+    				 input[type='text'][id*='login'i],\
+    				 input[type='text'][aria-label*='mail'i],\
+    				 input[type='text'][aria-label*='user'i],\
+    				 input[type='text'][aria-label*='login'i]");
+    for (let n of l) if (!n.value) {
+      setInputValue(n,email);
+    }
+  }
+  l=document.querySelectorAll("input[type='password']");
+  let b=false; for (let n of l) if (!n.value) {
+    setInputValue(n,pw);
+    b=true;
+  }
+  if (!b) prompt("Generated password is:",pw);
+}
+
+genPass();
+
+</textarea>
+</body>
+</html>
+
