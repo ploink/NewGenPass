@@ -39,16 +39,15 @@ function generate() {
   s=s.replace(/\s*\^\s*/g,"^");
   s=s.replace(/\\?\s*\n\s*/g,'');
   s="javascript:(function(){"+s+"})();";
-  let e=document.getElementById("bookmarklet"); 
-  e.href=s; 
-  e.style.visibility="inherit";
+  document.getElementById("bookmarklet").href=s;
+  document.getElementById("result").style.visibility="inherit";
 }
 </script>
 </head>
 <body>
 
 
-<h2>Newgenpass.js generator</h2>
+<h2>NewGenPass Bookmarklet Generator</h2>
 <form>
 <p>
   <label for="email"><b>Autofill email address.</b><br>
@@ -96,12 +95,18 @@ Remember what you enter here and/or backup your bookmarklet.</p>
   <button type="button" onClick="generate()">Generate</button>
 </p>
 </form>
-<a href="" id="bookmarklet" style="visibility: hidden;">This is your password generator bookmarklet</a>
+<span id="result" style="visibility: hidden;">
+<b><a href="" id="bookmarklet" >This is your password generator bookmarklet</a></b><br>
+In Firefox you may just drag and drop this link to your bookmarks bar.
+For Chrome-based browsers, bookmark this page, 
+then right-click the link above and select "Copy link address", 
+then edit the bookmark and paste it there.
 <br>
 
 <hr>
-<p>Javascript snippet:</p>
+<p><b>Javascript snippet:<b></p>
 <textarea id="snippet" cols="80" rows="20"></textarea>
+</span>
 
 <br><textarea id="source" style="display: none; visibility: hidden;">
 function fnv1a_128(s) {
