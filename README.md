@@ -7,3 +7,5 @@ GenPass has some limitations, for example generated passwords may not be accepte
 So I decided to write my own version, based on the simple but effective [Fowler-Noll-Vo hash function](https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function). I chose the 128-bit [FNV-1a](https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function#FNV-1a_hash) that gives enough bits to generate password hashes up to 21 characters.
 
 Credits to Chris Zarate for the original GenPass script.
+# Usage
+Download the newgenpass.html to your pc and open it locally, or [just click here](https://htmlpreview.github.io/?https://raw.githubusercontent.com/ploink/NewGenPass/master/newgenpass.html).
