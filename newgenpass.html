@@ -1,9 +1,19 @@
 <html>
 <head>
-
+<meta name="viewport" content="width=device-width">
 <style>
-  input[type="text"] {width: 20em;}
-  input[type="email"] {width: 20em;}
+  html,body {overflow-x: hidden;}
+  body { 
+    max-width: 40em; 
+    margin: auto; 
+    padding: 1em;
+    background-color: lightgrey; 
+    font-family: sans-serif;
+  }
+  input {font-size: inherit;}
+  input[type="text"],input[type="email"] {width: 20em;}
+  input[type="number"] {width: 3.5em;}
+  td {vertical-align: bottom;}
 </style>
 
 <script>
@@ -47,7 +57,7 @@ function generate() {
 <body>
 
 
-<h2>NewGenPass Bookmarklet Generator</h2>
+<h3><a href="https://github.com/ploink/NewGenPass">NewGenPass Bookmarklet Generator</a></h3>
 <form>
 <p>
   <label for="email"><b>Autofill email address.</b><br>
@@ -78,8 +88,8 @@ Remember what you enter here and/or backup your bookmarklet.</p>
 </p>
 <p>
   <table border=0>
-  <tr><td><label for="length">Password length (8-21 characters):</label></td>
-  <td><input type="number" id="length" min="8" max="21" value="16"></td></tr>
+  <tr><td><label for="length">Password length (8-20 characters):</label></td>
+  <td><input type="number" id="length" min="8" max="20" value="16"></td></tr>
   <tr><td><label for="upper">Minimum number of uppercase characters:</label></td>
   <td><input type="number" id="upper" min="0" max="3" value="2"></td></tr>
   <tr><td><label for="lower">Minimum number of lowercase characters:</label></td>
@@ -105,7 +115,7 @@ then edit the bookmark and paste it there.
 
 <hr>
 <p><b>Javascript snippet:<b></p>
-<textarea id="snippet" cols="80" rows="20"></textarea>
+<textarea id="snippet" cols="50" rows="20" style="width: 100%" spellcheck="false" ></textarea>
 </span>
 
 <br><textarea id="source" style="display: none; visibility: hidden;">
@@ -177,16 +187,18 @@ function genPass() {
   pw=hash(pw+'@'+h);
   let email="[EMAIL]";
   if (email) {
-    l=document.querySelectorAll("input[type='email'],\
-    				 input[type='text'][placeholder*='mail'i],\
-    				 input[type='text'][placeholder*='user'i],\
-    				 input[type='text'][placeholder*='login'i],\
-    				 input[type='text'][id*='mail'i],\
-    				 input[type='text'][id*='user'i],\
-    				 input[type='text'][id*='login'i],\
-    				 input[type='text'][aria-label*='mail'i],\
-    				 input[type='text'][aria-label*='user'i],\
-    				 input[type='text'][aria-label*='login'i]");
+    l=document.querySelectorAll("\
+      input[type='email'],\
+      input[type='text'][placeholder*='mail'i],\
+      input[type='text'][placeholder*='user'i],\
+      input[type='text'][placeholder*='login'i],\
+      input[type='text'][id*='mail'i],\
+      input[type='text'][id*='user'i],\
+      input[type='text'][id*='login'i],\
+      input[type='text'][aria-label*='mail'i],\
+      input[type='text'][aria-label*='user'i],\
+      input[type='text'][aria-label*='login'i]\
+    ");
     for (let n of l) if (!n.value) {
       setInputValue(n,email);
     }
