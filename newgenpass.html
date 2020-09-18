@@ -4,7 +4,7 @@
 <style>
   html,body {overflow-x: hidden;}
   body { 
-    max-width: 40em; 
+    max-width: 30em; 
     margin: auto; 
     padding: 1em;
     background-color: lightgrey; 
@@ -14,43 +14,52 @@
   input[type="text"],input[type="email"] {width: 20em;}
   input[type="number"] {width: 3.5em;}
   td {vertical-align: bottom;}
+  textarea {white-space: nowrap;}
 </style>
 
 <script>
-function fnv1_128(s) {
-  let p = 309485009821345068724781371n;
+function fnv0_128(s) {
+  let p = (1n << 88n) + (1n << 8n) + 0x3bn;
   let h = 0n;
-  for (let c of s) {  
+  let m = 1n << 128n;
+  m--;
+  for (let c of s) {
     h *= p;
-    h &= 0xffffffffffffffffffffffffffffffffn;
+    h &= m;
     h ^= BigInt(c.charCodeAt(0));
   }
   return h;
 }
-  
+
 function generate() {
-  s=document.getElementById("source").value;
-  s=s.replace("[EMAIL]",document.getElementById("email").value);
-  s=s.replace("[OFFSET]",fnv1_128(document.getElementById("offset").value));  
-  s=s.replace("[SPECIALCHARS]",document.getElementById("specialChars").value);
-  s=s.replace("[LENGTH]",document.getElementById("length").value);
-  s=s.replace("[UPPER]",document.getElementById("upper").value);
-  s=s.replace("[LOWER]",document.getElementById("lower").value);
-  s=s.replace("[DIGITS]",document.getElementById("digits").value);
-  s=s.replace("[SPECIAL]",document.getElementById("special").value);
-  snippet.value=s;
-  s=s.replace(/\/\/.*/g,"");
-  s=s.replace(/\s*{\s*/g,"{").replace(/\s*}\s*/g,"}");
-  s=s.replace(/\s*\(\s*/g,"(").replace(/\s*\)\s*/g,")");
-  s=s.replace(/\s*=\s*/g,"=");
-  s=s.replace(/\s*&&\s*/g,"&&");
-  s=s.replace(/\s*\*\s*/g,"*");
-  s=s.replace(/\s*\&\s*/g,"&");
-  s=s.replace(/\s*\^\s*/g,"^");
-  s=s.replace(/\\?\s*\n\s*/g,'');
-  s="javascript:(function(){"+s+"})();";
-  document.getElementById("bookmarklet").href=s;
-  document.getElementById("result").style.visibility="inherit";
+  s = document.getElementById("source").value;
+  s = s.replace("[EMAIL]", document.getElementById("email").value);
+  s = s.replace("[OFFSET]", fnv0_128(document.getElementById("offset").value));
+  s = s.replace("[SPECIALCHARS]", document.getElementById("specialChars").value);
+  s = s.replace("[LENGTH]", document.getElementById("length").value);
+  s = s.replace("[UPPER]", document.getElementById("upper").value);
+  s = s.replace("[LOWER]", document.getElementById("lower").value);
+  s = s.replace("[DIGITS]", document.getElementById("digits").value);
+  s = s.replace("[SPECIAL]", document.getElementById("special").value);
+  snippet.value = s;
+  s = s.replace(/\/\/.*/g, "");
+  s = s.replace(/\s*{\s*/g, "{").replace(/\s*}\s*/g, "}");
+  s = s.replace(/\s*\(\s*/g, "(").replace(/\s*\)\s*/g, ")");
+  s = s.replace(/\s*\<\s*/g, "<").replace(/\s*\>\s*/g, ">");
+  s = s.replace(/\s*=\s*/g, "=");
+  s = s.replace(/\s*&&\s*/g, "&&");
+  s = s.replace(/\s*\*\s*/g, "*");
+  s = s.replace(/\s*\&\s*/g, "&");
+  s = s.replace(/\s*\^\s*/g, "^");
+  s = s.replace(/\s*\,\s*/g, ",");
+  s = s.replace(/\s*\;\s*/g, ";");
+  s = s.replace(/\s*\+\s*/g, "+");
+  s = s.replace(/\\?\s*\n\s*/g, '');
+  s = "javascript:(function(){" + s + "})();";
+  document.getElementById("bookmarklet").href = s;
+  let e = document.getElementById("result");
+  e.style.display = "block";
+  e.scrollIntoView();
 }
 </script>
 </head>
@@ -61,7 +70,7 @@ function generate() {
 <form>
 <p>
   <label for="email"><b>Autofill email address.</b><br>
-  leave blank to disable this feature<br></label>
+  Leave blank to disable this feature<br></label>
   <input type="email" id="email">
 </p>
 
@@ -70,7 +79,7 @@ Remember what you enter here and/or backup your bookmarklet.</p>
 
 <p>
   <label for="offset">
-    <b>Seed text to calculate the <a href="https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function#FNV_offset_basis" target="_blank">encryption offset_basis</a>.</b><br>
+    <b>Seed text to calculate the <a href="https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function#FNV_offset_basis" target="_blank">FNV offset basis</a>.</b><br>
       You may change this to any random text to customize the encryption:<br>
   </label>
   <input type="text" id="offset" onClick="this.select();" value="chongo <Landon Curt Noll> /\../\">
@@ -105,12 +114,11 @@ Remember what you enter here and/or backup your bookmarklet.</p>
   <button type="button" onClick="generate()">Generate</button>
 </p>
 </form>
-<span id="result" style="visibility: hidden;">
+<span id="result" style="display: none;">
 <b><a href="" id="bookmarklet" >This is your password generator bookmarklet</a></b><br>
-In Firefox you may just drag and drop this link to your bookmarks bar.
-For Chrome-based browsers, bookmark this page, 
-then right-click the link above and select "Copy link address", 
-then edit the bookmark and paste it there.
+In Firefox you can just drag and drop this hyperlink to your bookmarks bar.
+For Chrome-based browsers, right-click the link above and select "Copy link address", 
+then bookmark this page, edit the bookmark and paste it there.
 <br>
 
 <hr>
@@ -118,76 +126,95 @@ then edit the bookmark and paste it there.
 <textarea id="snippet" cols="50" rows="20" style="width: 100%" spellcheck="false" ></textarea>
 </span>
 
-<br><textarea id="source" style="display: none; visibility: hidden;">
+<textarea id="source" style="display: none;">
 function fnv1a_128(s) {
-  let p = 309485009821345068724781371n;
+  let p = (1n << 88n) + (1n << 8n) + 0x3bn;
   let h = [OFFSET]n;
-  for (let c of s) {  
+  let m = 1n << 128n;
+  m--;
+  for (let c of s) {
     h ^= BigInt(c.charCodeAt(0));
     h *= p;
-    h &= 0xffffffffffffffffffffffffffffffffn;
+    h &= m;
   }
   return h;
 }
 
-function chk(s1,s2,n) {
-  let i=0;
-  for (let c of s1) if (s2.includes(c)) i++;
-  return (i>=n);
+function chk(s1, s2, n) {
+  let i = 0;
+  for (let c of s1)
+    if (s2.includes(c)) i++;
+  return (i >= n);
 }
 
 function hash(s) {
-  let su="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  let sl=su.toLowerCase();
-  let sd="0123456789";
-  let ss="[SPECIALCHARS]";
-  let sa=su+sl+sd+ss;
-  for (r=1;;r++) {
-    h=fnv1a_128(s);
-    s="";
-    l=BigInt(sa.length);
-    for (let i=[LENGTH];i--;) {
-      s+=sa[h % l]; 
-      h/=l;
+  let su = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let sl = su.toLowerCase();
+  let sd = "0123456789";
+  let ss = "[SPECIALCHARS]";
+  let sa = su + sl + sd + ss;
+  for (r = 1;; r++) {
+    h = fnv1a_128(s);
+    s = "";
+    l = BigInt(sa.length);
+    for (let i = [LENGTH]; i--;) {
+      s += sa[h % l];
+      h /= l;
     }
-    if (chk(s,ss,[SPECIAL]) && chk(s,sd,[DIGITS]) && chk(s,sl,[LOWER]) && chk(s,su,[UPPER])) break;
-    s+='_'+r.toString();
-  } 
+    if (chk(s, ss, [SPECIAL]) && chk(s, sd, [DIGITS]) && chk(s, sl, [LOWER]) && chk(s, su, [UPPER])) break;
+    s += '_' + r.toString();
+  }
   return s;
 }
 
 function host() {
-  host=window.location.hostname.split('.');
-  if (host.length<=2) return (host.join('.'));
+  host = window.location.hostname.split('.');
+  if (host.length <= 2) return (host.join('.'));
   else {
-    s=host.slice(-2).join('.');
+    s = host.slice(-2).join('.');
     d = 'ab.ca|ac.ac|ac.at|ac.be|ac.cn|ac.il|ac.in|ac.jp|ac.kr|ac.nz|ac.th|ac.uk|ac.za|adm.br|adv.br|agro.pl|ah.cn|aid.pl|alt.za|am.br|arq.br|art.br|arts.ro|asn.au|asso.fr|asso.mc|atm.pl|auto.pl|bbs.tr|bc.ca|bio.br|biz.pl|bj.cn|br.com|cn.com|cng.br|cnt.br|co.ac|co.at|co.il|co.in|co.jp|co.kr|co.nz|co.th|co.uk|co.za|com.au|com.br|com.cn|com.ec|com.fr|com.hk|com.mm|com.mx|com.pl|com.ro|com.ru|com.sg|com.tr|com.tw|cq.cn|cri.nz|de.com|ecn.br|edu.au|edu.cn|edu.hk|edu.mm|edu.mx|edu.pl|edu.tr|edu.za|eng.br|ernet.in|esp.br|etc.br|eti.br|eu.com|eu.lv|fin.ec|firm.ro|fm.br|fot.br|fst.br|g12.br|gb.com|gb.net|gd.cn|gen.nz|gmina.pl|go.jp|go.kr|go.th|gob.mx|gov.br|gov.cn|gov.ec|gov.il|gov.in|gov.mm|gov.mx|gov.sg|gov.tr|gov.za|govt.nz|gs.cn|gsm.pl|gv.ac|gv.at|gx.cn|gz.cn|hb.cn|he.cn|hi.cn|hk.cn|hl.cn|hn.cn|hu.com|idv.tw|ind.br|inf.br|info.pl|info.ro|iwi.nz|jl.cn|jor.br|jpn.com|js.cn|k12.il|k12.tr|lel.br|ln.cn|ltd.uk|mail.pl|maori.nz|mb.ca|me.uk|med.br|med.ec|media.pl|mi.th|miasta.pl|mil.br|mil.ec|mil.nz|mil.pl|mil.tr|mil.za|mo.cn|muni.il|nb.ca|ne.jp|ne.kr|net.au|net.br|net.cn|net.ec|net.hk|net.il|net.in|net.mm|net.mx|net.nz|net.pl|net.ru|net.sg|net.th|net.tr|net.tw|net.za|nf.ca|ngo.za|nm.cn|nm.kr|no.com|nom.br|nom.pl|nom.ro|nom.za|ns.ca|nt.ca|nt.ro|ntr.br|nx.cn|odo.br|on.ca|or.ac|or.at|or.jp|or.kr|or.th|org.au|org.br|org.cn|org.ec|org.hk|org.il|org.mm|org.mx|org.nz|org.pl|org.ro|org.ru|org.sg|org.tr|org.tw|org.uk|org.za|pc.pl|pe.ca|plc.uk|ppg.br|presse.fr|priv.pl|pro.br|psc.br|psi.br|qc.ca|qc.com|qh.cn|re.kr|realestate.pl|rec.br|rec.ro|rel.pl|res.in|ru.com|sa.com|sc.cn|school.nz|school.za|se.com|se.net|sh.cn|shop.pl|sk.ca|sklep.pl|slg.br|sn.cn|sos.pl|store.ro|targi.pl|tj.cn|tm.fr|tm.mc|tm.pl|tm.ro|tm.za|tmp.br|tourism.pl|travel.pl|tur.br|turystyka.pl|tv.br|tw.cn|uk.co|uk.com|uk.net|us.com|uy.com|vet.br|web.za|web.com|www.ro|xj.cn|xz.cn|yk.ca|yn.cn|za.com';
     d = d.split('|');
-    if (d.indexOf(s)>=0) return (host.slice(-3).join('.'));
+    if (d.indexOf(s) >= 0) return (host.slice(-3).join('.'));
   }
   return (host.slice(-2).join('.'));
 }
 
-function setInputValue(i,s) {
-  i.value=s;
+function setInputValue(i, s) {
+  i.value = s;
   let t = i._valueTracker;
   if (t) t.setValue("tracker@value");
-  let e = new Event('input', { bubbles: true});
+  let e = new Event('input', {
+    bubbles: true
+  });
   e.simulated = true;
   i.dispatchEvent(e);
 }
 
+function findAll(s) {
+    frames = document.querySelectorAll('iframe');
+    let all = [];
+    for (let i of frames) {
+        try {
+            let l = i.contentWindow.document.body.querySelectorAll(s);
+            all = all.concat(Array.prototype.slice.call(l));
+        } catch (e) {}
+        ;
+    }
+    l = document.querySelectorAll(s);
+    all = all.concat(Array.prototype.slice.call(l));
+    return all;
+}
 
 function genPass() {
-  let pw=prompt("Master password:","");
+  let pw = prompt("Master password:", "");
   if (!pw) return;
-  let h=host();
-  h=prompt("Using domain name:",h);
-  if (h==null) return;
-  pw=hash(pw+'@'+h);
-  let email="[EMAIL]";
+  let h = host();
+  h = prompt("Using domain name:", h);
+  if (h == null) return;
+  pw = hash(pw + '@' + h);
+  let email = "[EMAIL]";
   if (email) {
-    l=document.querySelectorAll("\
+    l = findAll("\
       input[type='email'],\
       input[type='text'][placeholder*='mail'i],\
       input[type='text'][placeholder*='user'i],\
@@ -199,20 +226,22 @@ function genPass() {
       input[type='text'][aria-label*='user'i],\
       input[type='text'][aria-label*='login'i]\
     ");
-    for (let n of l) if (!n.value) {
-      setInputValue(n,email);
+    for (let n of l)
+      if (!n.value) {
+        setInputValue(n, email);
+      }
+  }
+  l = findAll("input[type='password']");
+  let b = false;
+  for (let n of l)
+    if (!n.value) {
+      setInputValue(n, pw);
+      b = true;
     }
-  }
-  l=document.querySelectorAll("input[type='password']");
-  let b=false; for (let n of l) if (!n.value) {
-    setInputValue(n,pw);
-    b=true;
-  }
-  if (!b) prompt("Generated password is:",pw);
+  if (!b) prompt("Generated password is:", pw);
 }
 
 genPass();
-
 </textarea>
 </body>
 </html>
