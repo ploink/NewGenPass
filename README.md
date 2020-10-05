@@ -8,4 +8,4 @@ So I decided to write my own version, based on the simple but effective [Fowler-
 
 Credits to Chris Zarate for the original GenPass script.
 # Usage
-Download the newgenpass.html to your pc and open it locally, or [just click here](https://htmlpreview.github.io/?https://raw.githubusercontent.com/ploink/NewGenPass/master/newgenpass.html).
+Download the newgenpass.html to your pc and open it locally, or [just click here](https://ploink.github.io/NewGenPass/newgenpass.html).
